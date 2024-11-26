@@ -7,27 +7,40 @@ def generate_deck():
     random.shuffle(deck)
     return deck
 
-def draw_card(deck):
+def draw_card(deck): # draws card from top of deck
     card = deck.pop()
     rank, suit = card
-    print("Drawn card:") # show a visual for drawn card
-    print(f"+-----+\n|{rank.ljust(2)}   |\n|  {suit}  |\n|   {rank.rjust(2)}|\n+-----+")
     return card
 
-def card_value(card):
-    if rank in ["J", "Q", "K"]: # assign 10 if rank is face card
+def card_value(rank, total, dealers_turn):
+    if rank in ["J", "Q", "K"]: # assign 10 if rank is face/court card
         return 10
-    elif rank == 'A': # assign 1 or 11 if rank is ace
-        while True:
-            try:
-                choice = int(input("You've drawn an Ace, would you like to count it as 1 or 11? "))
-                if choice == 1:
-                    return 1
-                elif choice == 11:
-                    return 11
-                else:
-                   print("Invalid choice. Please choose 1 or 11.") 
-            except ValueError:
-                print("Invalid choice. Please choose 1 or 11.")
+    elif rank == "A": # assign 11 to ace unless total would go over 21, then assign 1
+        if dealers_turn == True:
+            if total + 11 > 21:
+                return 1
+            else:
+                return 11
+        if dealers_turn == False:
+            if total + 11 > 21:
+                return 1
+            else:
+                choice = choose_ace()
+                return choice
     else:
         return int(rank)
+
+
+def choose_ace():
+    while True:
+        try:
+            print()
+            choice = int(input("You've drawn an Ace, would you like to count it as 1 or 11? "))
+            if choice == 1:
+                return 1
+            elif choice == 11:
+                return 11
+            else:
+                print("Invalid choice. Please choose 1 or 11.")
+        except ValueError:
+            print("Invalid choice. Please choose 1 or 11.")
