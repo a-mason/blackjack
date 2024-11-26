@@ -23,17 +23,3 @@ def update_money(bet, win):
     print(f"Money: {new_money}")
     return new_money
 
-'''
-def main():
-    money = current_money()
-    print(f"Money: {money}")
-    bet = float(input("Bet amount: "))
-    which = input("Win or Lose? ").lower()
-    if which == "win":
-        update_money(bet, True)
-    elif which == "lose":
-        update_money(bet, False)
-
-if __name__ == "__main__":
-    main()
-'''
