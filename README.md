@@ -1,4 +1,4 @@
-"# Blackjack Case Study by Section for Murach's Python Programming" 
+# Blackjack Case Study by Section for Murach's Python Programming" 
 
 "# main
 - title(): displays title of program
@@ -9,7 +9,7 @@
 - print_totals(): displays total points of player and dealer when game ends
 - main(): initializes the game, managers turns, updates money, allows multiple rounds"
 
-"# db
+# db
 - current_money(): shows number in text file
 - update_money(): writes updated number in text file depending on player win or loss"
 - buy_more(): gives player option to add money, writes number in text file
