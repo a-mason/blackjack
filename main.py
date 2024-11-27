@@ -1,6 +1,7 @@
 import deckofcards
 import heldcards
 import db
+import sys
 
 def title():
     print("BLACKJACK!")
@@ -99,6 +100,10 @@ def main():
                 buy_chips = input("You have under 5 chips, would you like to purchase more (y/n)?: ").lower() 
                 if buy_chips == "y": # buy more chips
                     money = db.buy_more(money)
+                else:
+                    print("You're unable to play with under 5 chips.")
+                    print("Please come back when you have more.")
+                    sys.exit()
                 
             try:
                 bet = float(input("Bet amount: "))  # player inputs bet amount
@@ -153,7 +158,7 @@ def main():
             print()
             print("Come back soon!")
             print("Bye!")
-            break 
+            sys.exit()
 
         
 if __name__ == "__main__":
