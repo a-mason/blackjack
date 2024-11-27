@@ -1,6 +1,6 @@
 # Blackjack Case Study by Section for Murach's Python Programming" 
 
-"# main
+# main
 - title(): displays title of program
 - player_hand(): handles player's turn, draw cards, decide to hit or stand, returns total points
 - dealer_hand(): handles dealer's turn, draws cards until 17 or higher, returns total points
