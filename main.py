@@ -5,7 +5,6 @@ import db
 def title():
     print("BLACKJACK!")
     print("Blackjack payout is 3:2")
-    print()
 
 def player_hand(deck, bet):
     player_cards = [] # list that record the rank and suit of cards drawn
@@ -32,27 +31,29 @@ def player_hand(deck, bet):
                 return total 
           
 
-def dealer_hand(deck, dealer_cards, dealer_ranks):
+def dealer_hand(deck, dealer_cards, dealer_ranks, player_total):
     total = sum(dealer_ranks)
-    while total < 17: # dealer draws until at least 17 points
-        rank, suit = deckofcards.draw_card(deck)
-        dealer_cards.append([rank, suit])
-        rank = deckofcards.card_value(rank, total, True)
-        dealer_ranks.append(int(rank))
-        total = sum(dealer_ranks) # reassign total in loop to avoid infinite looping
 
-        
-        if total > 21:
-            print("Dealer bust, player wins!")
-            db.update_money(bet, True)
-            return total  # dealer loses if cards total more than 21
-        elif total == 21:
-            print("Dealer blackjack!")
-            db.update_money(bet, False)
-            return total  # dealer wins if cards equal 21
-        else:
-            print("Dealer stands.")
-            return total  # dealer stands
+    if player_total >= 21: # skip the function if player got blackjack or busts
+        return total
+    
+    else:
+        while total < 17: # dealer draws until at least 17 points
+            rank, suit = deckofcards.draw_card(deck)
+            dealer_cards.append([rank, suit])
+            rank = deckofcards.card_value(rank, total, True)
+            dealer_ranks.append(int(rank))
+            total = sum(dealer_ranks) # reassign total in loop to avoid infinite looping
+
+            if total > 21:
+                print("Dealer busts!")
+                return total  # dealer loses if cards total more than 21
+            elif total == 21:
+                print("Dealer blackjack!")
+                return total  # dealer wins if cards equal 21
+            else:
+                print("Dealer stands.")
+                return total  # dealer stands
             
 def show_card(deck):
     print("DEALER'S SHOW CARD:")
@@ -76,55 +77,83 @@ def hit(player_cards, player_ranks, deck):
     player_ranks.append(int(rank))
     if len(player_cards) >= 3: # avoids showing cards multiple times during starting cards
         heldcards.show_player(player_cards)
+
+def print_totals(player_total, dealer_total):
+    print()
+    print(f"YOUR POINTS: {player_total}")
+    print(f"DEALER'S POINTS: {dealer_total}")
+    
     
     
 def main():
     title()
-    money = db.current_money()         
-    print(f"Money: {money}") # display player's current money value
-    bet = float(input("Bet amount: ")) # player inputs bet amount
-    print()
-    deck = deckofcards.generate_deck() # generates shuffled deck
-    dealer_cards, dealer_ranks = show_card(deck)
     
-    while True:
+    while True: # begins game
+        print()
+        money = db.current_money()
+        deck = deckofcards.generate_deck() # generates shuffled deck
+        print(f"Money: {money}") # display player's current money value
+        
+        while True:  # loop until a valid bet is entered
+            if money < 5:
+                buy_chips = input("You have under 5 chips, would you like to purchase more (y/n)?: ").lower() 
+                if buy_chips == "y": # buy more chips
+                    money = db.buy_more(money)
+                
+            try:
+                bet = float(input("Bet amount: "))  # player inputs bet amount
+                if bet > money:
+                    print("You cannot afford to bet that much, please bet again.")
+                elif bet < 5:
+                    print("Minimum bet is 5, please bet again.")
+                elif bet > 1000:
+                    print("Maximum bet is 1000, please bet again.")
+                else:
+                    break
+            except ValueError:
+                print("Bet must be a valid number.")
+        print()
+
+        dealer_cards, dealer_ranks = show_card(deck)
         player_total = player_hand(deck, bet)
+        dealer_total = sum(dealer_ranks) # gets dealer's total incase player wins
         
         if player_total >= 21:  # if player blackjack or busts, skip the dealer's turn
             if player_total == 21: # blackjack
-                print()
-                print(f"YOUR POINTS: {player_total}")
-                print(f"DEALER'S POINTS: {sum(dealer_ranks)}") # prints as sum to avoid square brackets
+                print_totals(player_total, dealer_total)
                 db.update_money(bet, True)
             else: # bust
-                print()
-                print(f"YOUR POINTS: {player_total}")
-                print(f"DEALER'S POINTS: {sum(dealer_ranks)}") # prints as sum to avoid square brackets
+                print_totals(player_total, dealer_total)
                 db.update_money(bet, False)
         
         elif player_total < 21: # if player stands under 21, dealer draws cards
-            dealer_total = dealer_hand(deck, dealer_cards, dealer_ranks)
-            print()
-            print(f"YOUR POINTS: {player_total}")
-            print(f"DEALER'S POINTS: {dealer_total}")
-
-        else:  # if neither player or dealer busts, compare totals to determine winner
-            if player_total > dealer_total:
-                print("Player wins!")
-                db.update_money(bet, True)
-            elif dealer_total > player_total:
-                print("Dealer wins!")
+            dealer_total = dealer_hand(deck, dealer_cards, dealer_ranks, player_total)
+            if dealer_total == 21: # dealer blackjack, player loses
+                print_totals(player_total, dealer_total)
                 db.update_money(bet, False)
-            else:
-                print("Player and Dealer's hands equal the same value, it's a tie!")
+            elif dealer_total > 21: # dealer bust, player wins
+                print_totals(player_total, dealer_total)
+                db.update_money(bet, True)
+            else:  # if neither player or dealer busts, compare totals to determine winner
+                if player_total > dealer_total:
+                    print("Player wins!")
+                    print_totals(player_total, dealer_total)
+                    db.update_money(bet, True)
+                elif dealer_total > player_total:
+                    print("Dealer wins!")
+                    print_totals(player_total, dealer_total)
+                    db.update_money(bet, False)
+                else:
+                    print_totals(player_total, dealer_total)
+                    print("Player and Dealer's hands equal the same value, it's a tie!")
 
         print()
-        again = input("Play again? (y/n): ").lower()
+        again = input("Play again? (y/n): ").lower() # player chooses to play again or end
         if again != "y":
             print()
             print("Come back soon!")
             print("Bye!")
-            break
+            break 
 
         
 if __name__ == "__main__":
