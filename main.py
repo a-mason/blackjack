@@ -48,12 +48,15 @@ def dealer_hand(deck, dealer_cards, dealer_ranks, player_total):
 
             if total > 21:
                 print("Dealer busts!")
+                heldcards.show_dealer(dealer_cards)
                 return total  # dealer loses if cards total more than 21
             elif total == 21:
                 print("Dealer blackjack!")
+                heldcards.show_dealer(dealer_cards)
                 return total  # dealer wins if cards equal 21
             else:
                 print("Dealer stands.")
+                heldcards.show_dealer(dealer_cards)
                 return total  # dealer stands
             
 def show_card(deck):
@@ -125,30 +128,37 @@ def main():
         
         if player_total >= 21:  # if player blackjack or busts, skip the dealer's turn
             if player_total == 21: # blackjack
+                heldcards.show_dealer(dealer_cards)
                 print_totals(player_total, dealer_total)
                 db.update_money(bet, True)
             else: # bust
+                heldcards.show_dealer(dealer_cards)
                 print_totals(player_total, dealer_total)
                 db.update_money(bet, False)
         
         elif player_total < 21: # if player stands under 21, dealer draws cards
             dealer_total = dealer_hand(deck, dealer_cards, dealer_ranks, player_total)
             if dealer_total == 21: # dealer blackjack, player loses
+                heldcards.show_dealer(dealer_cards)
                 print_totals(player_total, dealer_total)
                 db.update_money(bet, False)
             elif dealer_total > 21: # dealer bust, player wins
+                heldcards.show_dealer(dealer_cards)
                 print_totals(player_total, dealer_total)
                 db.update_money(bet, True)
             else:  # if neither player or dealer busts, compare totals to determine winner
                 if player_total > dealer_total:
                     print("Player wins!")
+                    heldcards.show_dealer(dealer_cards)
                     print_totals(player_total, dealer_total)
                     db.update_money(bet, True)
                 elif dealer_total > player_total:
                     print("Dealer wins!")
+                    heldcards.show_dealer(dealer_cards)
                     print_totals(player_total, dealer_total)
                     db.update_money(bet, False)
                 else:
+                    heldcards.show_dealer(dealer_cards)
                     print_totals(player_total, dealer_total)
                     print("Player and Dealer's hands equal the same value, it's a tie!")
 
